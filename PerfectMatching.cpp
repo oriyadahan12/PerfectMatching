@@ -5,9 +5,13 @@ vector<vector<Segment>> PerfectMatching::getAllMatchings(const vector<Point2D> &
     vector<vector<Segment>> matchings;
     improveMatching(matchings, points, {});
 
+    for (unsigned int i = 0; i < matchings.size(); i++) { // sort all the segments in order to compare them.
+        std::sort(matchings[i].begin(), matchings[i].end());
+    }
+
     for (unsigned int i = 0; i < matchings.size(); i++) {
         for (unsigned int j = i+1; j < matchings.size(); j++) {
-            if (isomorphic(matchings[i], matchings[j])) {//check if the matching is isomorphic to any other matching.
+            if (matchings[i] == matchings[j]) { //check if the matching is isomorphic to any other matching.
                 matchings.erase(matchings.begin() + j);
                 j--;
             }

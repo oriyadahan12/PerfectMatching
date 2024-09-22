@@ -27,6 +27,8 @@ bool Geometry::doIntersect(const Point2D &p1, const Point2D &q1, const Point2D &
     Orientation o2 = getOrientation(p1, q1, q2);
     Orientation o3 = getOrientation(p2, q2, p1);
     Orientation o4 = getOrientation(p2, q2, q1);
+    
+    //if the segments are in the same direction, they can't intersect.
 
     if (o1 != o2 && o3 != o4) return true;
 
