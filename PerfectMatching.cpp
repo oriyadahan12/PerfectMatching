@@ -12,8 +12,9 @@ vector<vector<Segment>> PerfectMatching::getAllMatchings(const vector<Point2D> &
     for (unsigned int i = 0; i < matchings.size(); i++) {
         for (unsigned int j = i+1; j < matchings.size(); j++) {
             if (matchings[i] == matchings[j]) { //check if the matching is isomorphic to any other matching.
-                matchings.erase(matchings.begin() + j);
-                j--;
+                matchings[j] = matchings.back();
+                matchings.pop_back();
+                j--;//decrement j to check the new matching at the same index.
             }
         }
     }
@@ -22,16 +23,16 @@ vector<vector<Segment>> PerfectMatching::getAllMatchings(const vector<Point2D> &
 }
 
 
-void PerfectMatching::buildAdjacencyMatrix(const vector<vector<Segment>>& matchings, vector<vector<bool>>& adjMatrix) const {
-    int matchCount = matchings.size();
-    for (int i = 0; i < matchCount; ++i) {
-        for (int j = i + 1; j < matchCount; ++j) {
-            if (areAdjacent(matchings[i], matchings[j])) {
-                adjMatrix[i][j] = adjMatrix[j][i] = true;
-            }
-        }
-    }
-}
+// void PerfectMatching::buildAdjacencyMatrix(const vector<vector<Segment>>& matchings, vector<vector<bool>>& adjMatrix) const {
+//     int matchCount = matchings.size();
+//     for (int i = 0; i < matchCount; ++i) {
+//         for (int j = i + 1; j < matchCount; ++j) {
+//             if (areAdjacent(matchings[i], matchings[j])) {
+//                 adjMatrix[i][j] = adjMatrix[j][i] = true;
+//             }
+//         }
+//     }
+// }
 
 
 bool PerfectMatching::intersects(const vector<Segment> &matching, const Segment &s) {
