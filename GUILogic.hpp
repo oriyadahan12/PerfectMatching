@@ -15,18 +15,21 @@ struct Match {
 
 class GUILogic {
 private:
-    // Color vertexColor = sf::Color::Color(255,0,255);
+    const sf::Color vertexColor = sf::Color(255,0,255);
+    const sf::Color edgeColor = sf::Color::White;
+    const sf::Color matchingVertexColor = sf::Color::White;
+    const sf::Color matchingEdgeColor = sf::Color(59, 176, 255);
 
 public:
     void run(const std::vector<Point2D> &points);
 
 private:
     std::vector<Point2D> initializePoints();
-    void drawMatchings(sf::RenderWindow& window, const std::vector<std::vector<Segment>>& matchings, const std::vector<std::vector<bool>>& adjMatrix, const std::vector<sf::Vector2f>& positions);   
-    void drawAdjacencyEdges(sf::RenderWindow& window, const std::vector<std::vector<Segment>>& matchings, const std::vector<std::vector<bool>>& adjMatrix);
-    sf::Vector2f getMidpoint(const std::vector<Segment>& matching);
+    void drawMatchings(sf::RenderWindow& window, const std::vector<Matching>& matchings, const std::vector<std::vector<bool>>& adjMatrix, const std::vector<sf::Vector2f>& positions);   
+    void drawAdjacencyEdges(sf::RenderWindow& window, const std::vector<Matching>& matchings, const std::vector<std::vector<bool>>& adjMatrix);
+    sf::Vector2f getMidpoint(const Matching& matching);
     int getClickedVertex(const sf::Vector2f& mousePos, const std::vector<sf::Vector2f>& positions);
-    void drawSegmentsInNewWindow(const std::vector<Segment>& segments);
+    void drawSegmentsInNewWindow(const Matching& segments);
 
 };
 

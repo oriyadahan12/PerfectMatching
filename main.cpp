@@ -22,8 +22,15 @@ int main() {
     };
 
     GUILogic guiLogic;
-
     guiLogic.run(points); // Start the GUI logic
+
+    // vector<Matching> matchings = PerfectMatchingFinder::getAllMatchings(points);
+    // for (const auto& matching : matchings) {
+    //     for (const auto& segment : matching) {
+    //         cout << segment << " ";
+    //     }
+    //     cout << endl;
+    // }
 
     return 0;
 }

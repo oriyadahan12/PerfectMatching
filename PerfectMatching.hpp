@@ -7,28 +7,48 @@
 
 using std::vector;
 
-class PerfectMatching {
+class Matching {
+    private:
+        vector<Segment> _segments;
+
+    public:
+        Matching() = default;
+        Matching(const vector<Segment>& segments) : _segments(segments) {}
+
+        const vector<Segment>& segments() const { return _segments; }
+
+        inline void sortSegmenting() { std::sort(_segments.begin(), _segments.end()); }
+
+        bool operator==(const Matching& other) const;
+
+        bool intersects(const Segment& s) const;
+        bool isFlip(const Matching& other) const;
+
+        void addMatch(const Segment& s) { _segments.push_back(s); }
+        void removeLastMatch() { _segments.pop_back(); }
+        size_t size() const { return _segments.size(); }
+
+        auto begin() const { return _segments.begin(); }
+        auto end() const { return _segments.end(); }
+        inline Segment getMatch(unsigned int i) const { return _segments[i]; }
+};
+
+class PerfectMatchingFinder {
 private:
 
-    static void improveMatching(vector<vector<Segment>> &matchings, const vector<Point2D> &points, const vector<Segment> &matching);
-
-    static bool intersects(const vector<Segment> &matching, const Segment &s);
-
-    static bool isomorphic(const vector<Segment> &matching, const vector<Segment> &other);
-
-    static bool isFlip(const vector<Segment> &matching1, const vector<Segment> &matching2);
-
-    
+    static void improveMatching(vector<Matching> &matchings, const vector<Point2D> &points, Matching &matching);
 
 public:
 
-    static vector<vector<Segment>> getAllMatchings(const vector<Point2D> &points);
+    // get all possible perfect matchings without repetitions or intersections
+    static vector<Matching> getAllMatchings(const vector<Point2D> &points);
 
-    static vector<vector<bool>> getAdjacencyMatrix(const vector<vector<Segment>> &matchings);
+    // get the adjacency matrix of the matchings
+    static vector<vector<bool>> getAdjacencyMatrix(const vector<Matching> &matchings);
 
-    // void buildAdjacencyMatrix(const vector<vector<Segment>>& matchings, vector<vector<bool>>& adjMatrix) const;
+    // void buildAdjacencyMatrix(const vector<Matching>& matchings, vector<vector<bool>>& adjMatrix) const;
 
-    // bool areAdjacent(const vector<Segment>& matching1, const vector<Segment>& matching2) const {
+    // bool areAdjacent(const Matching& matching1, const Matching& matching2) const {
     // int commonSegments = 0;
     // for (const auto& seg1 : matching1) {
     //     for (const auto& seg2 : matching2) {

@@ -11,7 +11,7 @@ std::ostream &operator<<(std::ostream &os, const Segment &s) {
 }
 
 Orientation Geometry::getOrientation(const Point2D &p1, const Point2D &p2, const Point2D &p3) {
-    double val = (p2.y() - p1.y()) * (p3.x() - p2.x()) - (p2.x() - p1.x()) * (p3.y() - p2.y());
+    double val = (p2.y() - p1.y()) * (p3.x() - p2.x()) - (p2.x() - p1.x()) * (p3.y() - p2.y());//cross product
     if (val == 0) return COLLINEAR;
     return (val > 0) ? CLOCKWISE : COUNTERCLOCKWISE;
 }
@@ -28,10 +28,11 @@ bool Geometry::doIntersect(const Point2D &p1, const Point2D &q1, const Point2D &
     Orientation o3 = getOrientation(p2, q2, p1);
     Orientation o4 = getOrientation(p2, q2, q1);
     
-    //if the segments are in the same direction, they can't intersect.
+    // if the segments are in the same direction, they can't intersect.
 
     if (o1 != o2 && o3 != o4) return true;
 
+    // if the segments are collinear, they can intersect if they overlap
     if (o1 == COLLINEAR && onSegment(p1, p2, q1)) return true;
     if (o2 == COLLINEAR && onSegment(p1, q2, q1)) return true;
     if (o3 == COLLINEAR && onSegment(p2, p1, q2)) return true;

@@ -4,25 +4,17 @@
 #include "PerfectMatching.hpp"
 #include <math.h>
 
-void GUILogic::drawMatchings(sf::RenderWindow& window, const std::vector<std::vector<Segment>>& matchings, const std::vector<std::vector<bool>>& adjMatrix, const std::vector<sf::Vector2f>& positions) {
+void GUILogic::drawMatchings(sf::RenderWindow& window, const std::vector<Matching>& matchings, const std::vector<std::vector<bool>>& adjMatrix, const std::vector<sf::Vector2f>& positions) {
     static sf::Font font;
     if (!font.loadFromFile("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf")) {
         // Handle error
     }
 
-    float centerX = 400;
-    float centerY = 300;
-    float radius = 250;
-
     // Draw vertices
     for (size_t i = 0; i < matchings.size(); ++i) {
-        float angle = 2 * 3.14159f * i / matchings.size();
-        float x = centerX + radius * cos(angle);
-        float y = centerY + radius * sin(angle);
-
         // Create vertex
         sf::CircleShape vertex(35);
-        vertex.setFillColor(sf::Color::Blue);
+        vertex.setFillColor(vertexColor);
         vertex.setPosition(positions[i].x - vertex.getRadius(), positions[i].y - vertex.getRadius());
         window.draw(vertex);
 
@@ -41,8 +33,8 @@ void GUILogic::drawMatchings(sf::RenderWindow& window, const std::vector<std::ve
         for (size_t j = 0; j < matchings.size(); ++j) {
             if (adjMatrix[i][j]) {
                 sf::Vertex line[] = {
-                    sf::Vertex(positions[i], sf::Color::White),
-                    sf::Vertex(positions[j], sf::Color::White)
+                    sf::Vertex(positions[i], edgeColor),
+                    sf::Vertex(positions[j], edgeColor)
                 };
                 window.draw(line, 2, sf::Lines); // Fixed line width
             }
@@ -65,13 +57,13 @@ int GUILogic::getClickedVertex(const sf::Vector2f& mousePos, const std::vector<s
 
 // Function to draw the segments of a matching in a new window
 // Function to draw the segments of a matching in a new window
-void GUILogic::drawSegmentsInNewWindow(const std::vector<Segment>& segments) {
+void GUILogic::drawSegmentsInNewWindow(const Matching& segments) {
     sf::RenderWindow window(sf::VideoMode(800, 600), "Matching Segments");
     const float pointRadius = 5.0f;  // Radius of the endpoint circles
     const float lineThickness = 5.0f; // Thickness of the line
 
     // Determine the minimum and maximum coordinates
-    double minX = segments[0].p1().x(), minY = segments[0].p1().y();
+    double minX = segments.getMatch(0).p1().x(), minY = segments.getMatch(0).p1().y();
     double maxX = minX, maxY = minY;
 
     for (const auto& segment : segments) {
@@ -96,7 +88,7 @@ void GUILogic::drawSegmentsInNewWindow(const std::vector<Segment>& segments) {
     float scale = std::min(scaleX, scaleY);
 
     // Normalized segments
-    std::vector<Segment> normalizedSegments = segments;
+    std::vector<Segment> normalizedSegments = segments.segments();
 
     for (auto& segment : normalizedSegments) {
         // Normalize the points to fit the screen
@@ -125,21 +117,21 @@ void GUILogic::drawSegmentsInNewWindow(const std::vector<Segment>& segments) {
             float length = sqrt(direction.x * direction.x + direction.y * direction.y);
             sf::RectangleShape thickLine(sf::Vector2f(length, lineThickness));
             thickLine.setPosition(p1);
-            thickLine.setFillColor(sf::Color::Green);
+            thickLine.setFillColor(matchingEdgeColor);
 
             // Rotate the rectangle to align with the segment
             float angle = atan2(direction.y, direction.x) * 180 / 3.14159f;
             thickLine.setRotation(angle);
             window.draw(thickLine);
 
-            // Draw the start and end points as red circles
+            // Draw the start and end points as circles
             sf::CircleShape startPoint(pointRadius);
-            startPoint.setFillColor(sf::Color::Red);
+            startPoint.setFillColor(matchingVertexColor);
             startPoint.setPosition(p1.x - pointRadius, p1.y - pointRadius); // Center the circle
             window.draw(startPoint);
 
             sf::CircleShape endPoint(pointRadius);
-            endPoint.setFillColor(sf::Color::Red);
+            endPoint.setFillColor(matchingVertexColor);
             endPoint.setPosition(p2.x - pointRadius, p2.y - pointRadius); // Center the circle
             window.draw(endPoint);
         }
@@ -148,11 +140,21 @@ void GUILogic::drawSegmentsInNewWindow(const std::vector<Segment>& segments) {
     }
 }
 
-void GUILogic::run(const std::vector<Point2D> &points) {
-    vector<vector<Segment>> matchings = PerfectMatching::getAllMatchings(points);
-    vector<vector<bool>> adjMatrix = PerfectMatching::getAdjacencyMatrix(matchings);
+void GUILogic::run(const std::vector<Point2D>& points) {
+    std::vector<Matching> matchings = PerfectMatchingFinder::getAllMatchings(points);
+    std::vector<std::vector<bool>> adjMatrix = PerfectMatchingFinder::getAdjacencyMatrix(matchings);
+
+    // Define window size
+    sf::VideoMode windowMode(800, 600);
     
-    sf::RenderWindow window(sf::VideoMode(800, 600), "Perfect Matching GUI");
+    // Center the window on the screen
+    sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
+    int windowX = (desktopMode.width - windowMode.width) / 2;
+    int windowY = (desktopMode.height - windowMode.height) / 2;
+
+    // Create a centered window
+    sf::RenderWindow window(windowMode, "Perfect Matching GUI | Oriya Dahan & Chaya Keller");
+    window.setPosition(sf::Vector2i(windowX, windowY));
 
     std::vector<sf::Vector2f> positions; // Store positions of vertices
 
