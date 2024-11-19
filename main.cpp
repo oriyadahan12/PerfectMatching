@@ -9,16 +9,16 @@ using std::endl;
 
 int main() {
     vector<Point2D> points = {
-            Point2D(0,0),
-            Point2D(0,1),
             Point2D(1,0),
-            Point2D(1,1),
-            Point2D(2,1),
-            Point2D(2,2),
-            Point2D(3,0),
-            Point2D(3,4),
-            Point2D(4,1),
-            Point2D(4,3)
+            Point2D(0.809,0.587),
+            Point2D(-1,0),
+            Point2D(-0.309,0.951),
+            Point2D(-0.809,0.587),
+            Point2D(-0.809,-0.587),
+            Point2D(-0.309,-0.951),
+            Point2D(0.309,-0.951),
+            Point2D(0.809,-0.587),
+            Point2D(0.309,0.951)
     };
 
     GUILogic guiLogic;
