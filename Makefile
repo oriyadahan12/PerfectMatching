@@ -1,6 +1,6 @@
 CXX = clang++
 CXXFLAGS = -std=c++17 -Wall -Wextra -O2
-LDFLAGS = -lsfml-graphics -lsfml-window -lsfml-system
+LDFLAGS = -lsfml-graphics -lsfml-window -lsfml-system -lX11
 
 SRCS = Geometry.cpp PerfectMatching.cpp GUILogic.cpp main.cpp
 OBJS = $(SRCS:.cpp=.o)

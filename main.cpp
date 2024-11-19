@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <X11/Xlib.h>
+#undef None
 #include "PerfectMatching.hpp"
 #include "GUILogic.hpp"
 
@@ -8,6 +10,11 @@ using std::cout;
 using std::endl;
 
 int main() {
+    if (!XInitThreads()) {
+        std::cerr << "Failed to initialize Xlib threading." << std::endl;
+        return -1;
+    }
+
     vector<Point2D> points = {
             Point2D(1,0),
             Point2D(0.809,0.587),

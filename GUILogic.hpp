@@ -34,7 +34,7 @@ public:
 
 private:
     std::vector<Point2D> initializePoints();
-    void drawMatchings(sf::RenderWindow& window, const std::vector<Matching>& matchings, const std::vector<std::vector<bool>>& adjMatrix, const std::vector<sf::Vector2f>& positions);   
+    void drawMainWindow(sf::RenderWindow& window, const std::vector<Matching>& matchings, const std::vector<std::vector<bool>>& adjMatrix, const std::vector<sf::Vector2f>& positions);   
     void drawAdjacencyEdges(sf::RenderWindow& window, const std::vector<Matching>& matchings, const std::vector<std::vector<bool>>& adjMatrix);
     sf::Vector2f getMidpoint(const Matching& matching);
     int getClickedVertex(const sf::Vector2f& mousePos, const std::vector<sf::Vector2f>& positions);

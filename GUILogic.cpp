@@ -1,10 +1,11 @@
-#include <SFML/Graphics.hpp>
-#include <vector>
 #include "GUILogic.hpp"
 #include "PerfectMatching.hpp"
+#include <SFML/Graphics.hpp>
+#include <vector>
 #include <math.h>
+#include <thread>
 
-void GUILogic::drawMatchings(sf::RenderWindow& window, const std::vector<Matching>& matchings, const std::vector<std::vector<bool>>& adjMatrix, const std::vector<sf::Vector2f>& positions) {
+void GUILogic::drawMainWindow(sf::RenderWindow& window, const std::vector<Matching>& matchings, const std::vector<std::vector<bool>>& adjMatrix, const std::vector<sf::Vector2f>& positions) {
     static sf::Font font;
     if (!font.loadFromFile("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf")) {
         std::cout << "Error loading font" << std::endl;
@@ -57,112 +58,85 @@ int GUILogic::getClickedVertex(const sf::Vector2f& mousePos, const std::vector<s
 }
 
 // Function to draw the segments of a matching in a new window
-// Function to draw the segments of a matching in a new window
 void GUILogic::drawSegmentsInNewWindow(const Matching& segments) {
-    sf::RenderWindow window(sf::VideoMode(800, 600), "Matching Segments");
-    const float pointRadius = 5.0f;  // Radius of the endpoint circles
-    const float lineThickness = 5.0f; // Thickness of the line
+    // Create a thread for the new window
+    std::thread([this, segments]() {
+        sf::RenderWindow window(sf::VideoMode(800, 600), "Matching Segments");
 
-    // Determine the minimum and maximum coordinates
-    double minX = segments.getMatch(0).p1().x(), minY = segments.getMatch(0).p1().y();
-    double maxX = minX, maxY = minY;
+        const float pointRadius = 5.0f;
+        const float lineThickness = 5.0f;
 
-    for (const auto& segment : segments) {
-        minX = std::min({minX, segment.p1().x(), segment.p2().x()});
-        minY = std::min({minY, segment.p1().y(), segment.p2().y()});
-        maxX = std::max({maxX, segment.p1().x(), segment.p2().x()});
-        maxY = std::max({maxY, segment.p1().y(), segment.p2().y()});
-    }
-
-    // Calculate the scaling factors
-    const float padding = 50.0f; // Padding from the edges of the window
-    const float windowWidth = 800.0f;
-    const float windowHeight = 600.0f;
-
-    double rangeX = maxX - minX;
-    double rangeY = maxY - minY;
-
-    float scaleX = (windowWidth - 2 * padding) / rangeX;
-    float scaleY = (windowHeight - 2 * padding) / rangeY;
-
-    // Use the smaller scale to maintain the aspect ratio
-    float scale = std::min(scaleX, scaleY);
-
-    // Normalized segments
-    std::vector<Segment> normalizedSegments = segments.segments();
-
-    for (auto& segment : normalizedSegments) {
-        // Normalize the points to fit the screen
-        Point2D p1 = (segment.p1() - Point2D(minX, minY)) * scale + Point2D(padding, padding);
-        Point2D p2 = (segment.p2() - Point2D(minX, minY)) * scale + Point2D(padding, padding);
-        segment = Segment(p1, p2);
-    }
-
-    while (window.isOpen()) {
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
-                window.close();
+        // Determine min and max coordinates for normalization
+        double minX = segments.getMatch(0).p1().x(), minY = segments.getMatch(0).p1().y();
+        double maxX = minX, maxY = minY;
+        for (const auto& segment : segments) {
+            minX = std::min({minX, segment.p1().x(), segment.p2().x()});
+            minY = std::min({minY, segment.p1().y(), segment.p2().y()});
+            maxX = std::max({maxX, segment.p1().x(), segment.p2().x()});
+            maxY = std::max({maxY, segment.p1().y(), segment.p2().y()});
         }
 
-        window.clear(sf::Color::Black);
+        const float padding = 50.0f;
+        const float windowWidth = 800.0f;
+        const float windowHeight = 600.0f;
+        double rangeX = maxX - minX;
+        double rangeY = maxY - minY;
+        float scaleX = (windowWidth - 2 * padding) / rangeX;
+        float scaleY = (windowHeight - 2 * padding) / rangeY;
+        float scale = std::min(scaleX, scaleY);
 
-        // Draw each normalized segment
-        for (const auto& segment : normalizedSegments) {
-            // Get start and end points
-            sf::Vector2f p1(segment.p1().x(), segment.p1().y());
-            sf::Vector2f p2(segment.p2().x(), segment.p2().y());
-
-            // Draw thicker line using a rectangle
-            sf::Vector2f direction = p2 - p1;
-            float length = sqrt(direction.x * direction.x + direction.y * direction.y);
-            sf::RectangleShape thickLine(sf::Vector2f(length, lineThickness));
-            thickLine.setPosition(p1);
-            thickLine.setFillColor(MATCHING_EDGE_COLOR);
-
-            // Rotate the rectangle to align with the segment
-            float angle = atan2(direction.y, direction.x) * 180 / 3.14159f;
-            thickLine.setRotation(angle);
-            window.draw(thickLine);
-
-            // Draw the start and end points as circles
-            sf::CircleShape startPoint(pointRadius);
-            startPoint.setFillColor(MATCHING_POINT_COLOR);
-            startPoint.setPosition(p1.x - pointRadius, p1.y - pointRadius); // Center the circle
-            window.draw(startPoint);
-
-            sf::CircleShape endPoint(pointRadius);
-            endPoint.setFillColor(MATCHING_POINT_COLOR);
-            endPoint.setPosition(p2.x - pointRadius, p2.y - pointRadius); // Center the circle
-            window.draw(endPoint);
+        std::vector<Segment> normalizedSegments = segments.segments();
+        for (auto& segment : normalizedSegments) {
+            Point2D p1 = (segment.p1() - Point2D(minX, minY)) * scale + Point2D(padding, padding);
+            Point2D p2 = (segment.p2() - Point2D(minX, minY)) * scale + Point2D(padding, padding);
+            segment = Segment(p1, p2);
         }
 
-        window.display();
-    }
+        while (window.isOpen()) {
+            sf::Event event;
+            while (window.pollEvent(event)) {
+                if (event.type == sf::Event::Closed)
+                    window.close();
+            }
+
+            window.clear(sf::Color::Black);
+            for (const auto& segment : normalizedSegments) {
+                sf::Vector2f p1(segment.p1().x(), segment.p1().y());
+                sf::Vector2f p2(segment.p2().x(), segment.p2().y());
+                sf::Vector2f direction = p2 - p1;
+
+                float length = sqrt(direction.x * direction.x + direction.y * direction.y);
+                sf::RectangleShape thickLine(sf::Vector2f(length, lineThickness));
+                thickLine.setPosition(p1);
+                thickLine.setFillColor(MATCHING_EDGE_COLOR);
+                float angle = atan2(direction.y, direction.x) * 180 / 3.14159f;
+                thickLine.setRotation(angle);
+                window.draw(thickLine);
+
+                sf::CircleShape startPoint(pointRadius);
+                startPoint.setFillColor(MATCHING_POINT_COLOR);
+                startPoint.setPosition(p1.x - pointRadius, p1.y - pointRadius);
+                window.draw(startPoint);
+
+                sf::CircleShape endPoint(pointRadius);
+                endPoint.setFillColor(MATCHING_POINT_COLOR);
+                endPoint.setPosition(p2.x - pointRadius, p2.y - pointRadius);
+                window.draw(endPoint);
+            }
+            window.display();
+        }
+    }).detach(); // Detach thread to allow independent operation
 }
 
 void GUILogic::run(const std::vector<Point2D>& points) {
     std::vector<Matching> matchings = PerfectMatchingFinder::getAllMatchings(points);
     std::vector<std::vector<bool>> adjMatrix = PerfectMatchingFinder::getAdjacencyMatrix(matchings);
 
-    // Define window size
-    sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
-    sf::VideoMode windowMode(MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
-    
-    // Center the window on the screen
-    int windowX = (desktopMode.width - windowMode.width) / 2;
-    int windowY = (desktopMode.height - windowMode.height) / 2;
+    sf::RenderWindow window(sf::VideoMode(MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT), "Perfect Matching GUI");
+    std::vector<sf::Vector2f> positions;
 
-    // Create a centered window
-    sf::RenderWindow window(windowMode, "Perfect Matching GUI | Oriya Dahan & Chaya Keller");
-    window.setPosition(sf::Vector2i(windowX, windowY));
-
-
-    std::vector<sf::Vector2f> positions; // Store positions of vertices
-
-    // Precompute vertex positions
-    float centerX = MAIN_WINDOW_WIDTH/2;
-    float centerY = MAIN_WINDOW_HEIGHT/2;
+    float centerX = MAIN_WINDOW_WIDTH / 2;
+    float centerY = MAIN_WINDOW_HEIGHT / 2;
     float radius = std::min(MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT) / 2 - 50;
     for (size_t i = 0; i < matchings.size(); ++i) {
         float angle = 2 * M_PI * i / matchings.size();
@@ -177,19 +151,17 @@ void GUILogic::run(const std::vector<Point2D>& points) {
             if (event.type == sf::Event::Closed)
                 window.close();
 
-            // Check for mouse click
             if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
                 sf::Vector2f mousePos(event.mouseButton.x, event.mouseButton.y);
                 int clickedVertex = getClickedVertex(mousePos, positions);
                 if (clickedVertex != -1) {
-                    // Open a new window and draw the segments of the clicked vertex
                     drawSegmentsInNewWindow(matchings[clickedVertex]);
                 }
             }
         }
 
         window.clear(sf::Color::Black);
-        drawMatchings(window, matchings, adjMatrix, positions); // Pass positions
+        drawMainWindow(window, matchings, adjMatrix, positions);
         window.display();
     }
 }
