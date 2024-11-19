@@ -17,6 +17,11 @@ $(EXEC): $(OBJS)
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+Geometry.o: Geometry.cpp Geometry.hpp
+PerfectMatching.o: PerfectMatching.cpp PerfectMatching.hpp
+GUILogic.o: GUILogic.cpp GUILogic.hpp
+main.o: main.cpp Geometry.hpp PerfectMatching.hpp GUILogic.hpp
+
 clean:
 	rm -f $(OBJS) $(EXEC)
 

@@ -15,12 +15,21 @@ struct Match {
 
 class GUILogic {
 private:
-    const sf::Color vertexColor = sf::Color(255,0,255);
-    const sf::Color edgeColor = sf::Color::White;
-    const sf::Color matchingVertexColor = sf::Color::White;
-    const sf::Color matchingEdgeColor = sf::Color(59, 176, 255);
+    const int VERTEX_RADIUS = 25;
+    const int TEXT_SIZE = VERTEX_RADIUS-5;
+    const sf::Color VERTEX_COLOR = sf::Color(255,0,255);
+    const sf::Color EDGE_COLOR = sf::Color::White;
+
+    const int POINT_RADIUS = 5;
+    const sf::Color MATCHING_POINT_COLOR = sf::Color::White;
+    const sf::Color MATCHING_EDGE_COLOR = sf::Color(59, 176, 255);
+
+    const int MAIN_WINDOW_WIDTH;
+    const int MAIN_WINDOW_HEIGHT;
 
 public:
+    inline GUILogic() : MAIN_WINDOW_WIDTH(sf::VideoMode::getDesktopMode().width),
+                        MAIN_WINDOW_HEIGHT(sf::VideoMode::getDesktopMode().height - 50) {}
     void run(const std::vector<Point2D> &points);
 
 private:

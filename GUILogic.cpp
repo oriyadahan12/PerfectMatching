@@ -7,14 +7,15 @@
 void GUILogic::drawMatchings(sf::RenderWindow& window, const std::vector<Matching>& matchings, const std::vector<std::vector<bool>>& adjMatrix, const std::vector<sf::Vector2f>& positions) {
     static sf::Font font;
     if (!font.loadFromFile("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf")) {
+        std::cout << "Error loading font" << std::endl;
         // Handle error
     }
 
     // Draw vertices
     for (size_t i = 0; i < matchings.size(); ++i) {
         // Create vertex
-        sf::CircleShape vertex(35);
-        vertex.setFillColor(vertexColor);
+        sf::CircleShape vertex(VERTEX_RADIUS);
+        vertex.setFillColor(VERTEX_COLOR);
         vertex.setPosition(positions[i].x - vertex.getRadius(), positions[i].y - vertex.getRadius());
         window.draw(vertex);
 
@@ -22,7 +23,7 @@ void GUILogic::drawMatchings(sf::RenderWindow& window, const std::vector<Matchin
         sf::Text vertexNumber;
         vertexNumber.setFont(font);
         vertexNumber.setString(std::to_string(i));
-        vertexNumber.setCharacterSize(30);
+        vertexNumber.setCharacterSize(TEXT_SIZE);
         vertexNumber.setFillColor(sf::Color::White);
         vertexNumber.setPosition(positions[i].x - 5, positions[i].y - 20);
         window.draw(vertexNumber);
@@ -33,8 +34,8 @@ void GUILogic::drawMatchings(sf::RenderWindow& window, const std::vector<Matchin
         for (size_t j = 0; j < matchings.size(); ++j) {
             if (adjMatrix[i][j]) {
                 sf::Vertex line[] = {
-                    sf::Vertex(positions[i], edgeColor),
-                    sf::Vertex(positions[j], edgeColor)
+                    sf::Vertex(positions[i], EDGE_COLOR),
+                    sf::Vertex(positions[j], EDGE_COLOR)
                 };
                 window.draw(line, 2, sf::Lines); // Fixed line width
             }
@@ -117,7 +118,7 @@ void GUILogic::drawSegmentsInNewWindow(const Matching& segments) {
             float length = sqrt(direction.x * direction.x + direction.y * direction.y);
             sf::RectangleShape thickLine(sf::Vector2f(length, lineThickness));
             thickLine.setPosition(p1);
-            thickLine.setFillColor(matchingEdgeColor);
+            thickLine.setFillColor(MATCHING_EDGE_COLOR);
 
             // Rotate the rectangle to align with the segment
             float angle = atan2(direction.y, direction.x) * 180 / 3.14159f;
@@ -126,12 +127,12 @@ void GUILogic::drawSegmentsInNewWindow(const Matching& segments) {
 
             // Draw the start and end points as circles
             sf::CircleShape startPoint(pointRadius);
-            startPoint.setFillColor(matchingVertexColor);
+            startPoint.setFillColor(MATCHING_POINT_COLOR);
             startPoint.setPosition(p1.x - pointRadius, p1.y - pointRadius); // Center the circle
             window.draw(startPoint);
 
             sf::CircleShape endPoint(pointRadius);
-            endPoint.setFillColor(matchingVertexColor);
+            endPoint.setFillColor(MATCHING_POINT_COLOR);
             endPoint.setPosition(p2.x - pointRadius, p2.y - pointRadius); // Center the circle
             window.draw(endPoint);
         }
@@ -145,10 +146,10 @@ void GUILogic::run(const std::vector<Point2D>& points) {
     std::vector<std::vector<bool>> adjMatrix = PerfectMatchingFinder::getAdjacencyMatrix(matchings);
 
     // Define window size
-    sf::VideoMode windowMode(800, 600);
+    sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
+    sf::VideoMode windowMode(MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
     
     // Center the window on the screen
-    sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
     int windowX = (desktopMode.width - windowMode.width) / 2;
     int windowY = (desktopMode.height - windowMode.height) / 2;
 
@@ -156,14 +157,15 @@ void GUILogic::run(const std::vector<Point2D>& points) {
     sf::RenderWindow window(windowMode, "Perfect Matching GUI | Oriya Dahan & Chaya Keller");
     window.setPosition(sf::Vector2i(windowX, windowY));
 
+
     std::vector<sf::Vector2f> positions; // Store positions of vertices
 
     // Precompute vertex positions
-    float centerX = 400;
-    float centerY = 300;
-    float radius = 250;
+    float centerX = MAIN_WINDOW_WIDTH/2;
+    float centerY = MAIN_WINDOW_HEIGHT/2;
+    float radius = std::min(MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT) / 2 - 50;
     for (size_t i = 0; i < matchings.size(); ++i) {
-        float angle = 2 * 3.14159f * i / matchings.size();
+        float angle = 2 * M_PI * i / matchings.size();
         float x = centerX + radius * cos(angle);
         float y = centerY + radius * sin(angle);
         positions.push_back(sf::Vector2f(x, y));
