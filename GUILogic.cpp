@@ -9,14 +9,26 @@ void GUILogic::drawMainWindow(sf::RenderWindow& window, const std::vector<Matchi
     static sf::Font font;
     if (!font.loadFromFile("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf")) {
         std::cout << "Error loading font" << std::endl;
-        // Handle error
+    }
+
+    // Choose vertex colors based on adjacency matrix
+    vector<sf::Color> vertexColors(matchings.size(), DEFAULT_VERTEX_COLOR);
+    for (size_t i = 0; i < matchings.size(); ++i) {
+        if (_isVertexChosen[i]) {
+            vertexColors[i] = CHOSEN_VERTEX_COLOR;
+            for (size_t j = 0; j < matchings.size(); ++j) {
+                if (adjMatrix[i][j] && !_isVertexChosen[j]) {
+                    vertexColors[j] = NEAR_CHOSEN_VERTEX_COLOR;
+                }
+            }
+        }
     }
 
     // Draw vertices
     for (size_t i = 0; i < matchings.size(); ++i) {
         // Create vertex
         sf::CircleShape vertex(VERTEX_RADIUS);
-        vertex.setFillColor(VERTEX_COLOR);
+        vertex.setFillColor(vertexColors[i]);
         vertex.setPosition(positions[i].x - vertex.getRadius(), positions[i].y - vertex.getRadius());
         window.draw(vertex);
 
@@ -34,11 +46,13 @@ void GUILogic::drawMainWindow(sf::RenderWindow& window, const std::vector<Matchi
     for (size_t i = 0; i < matchings.size(); ++i) {
         for (size_t j = 0; j < matchings.size(); ++j) {
             if (adjMatrix[i][j]) {
+                bool isChosen = _isVertexChosen[i] || _isVertexChosen[j];
+                sf::Color edgeColor = isChosen ? CHOSEN_EDGE_COLOR : EDGE_COLOR;
                 sf::Vertex line[] = {
-                    sf::Vertex(positions[i], EDGE_COLOR),
-                    sf::Vertex(positions[j], EDGE_COLOR)
+                    sf::Vertex(positions[i], edgeColor),
+                    sf::Vertex(positions[j], edgeColor)
                 };
-                window.draw(line, 2, sf::Lines); // Fixed line width
+                window.draw(line, 2, sf::Lines);
             }
         }
     }
@@ -58,9 +72,9 @@ int GUILogic::getClickedVertex(const sf::Vector2f& mousePos, const std::vector<s
 }
 
 // Function to draw the segments of a matching in a new window
-void GUILogic::drawSegmentsInNewWindow(const Matching& segments) {
+void GUILogic::drawSegmentsInNewWindow(const Matching& segments, int vertexIndex) {
     // Create a thread for the new window
-    std::thread([this, segments]() {
+    std::thread([this, segments, vertexIndex]() {
         sf::RenderWindow window(sf::VideoMode(800, 600), "Matching Segments");
 
         const float pointRadius = 5.0f;
@@ -125,12 +139,14 @@ void GUILogic::drawSegmentsInNewWindow(const Matching& segments) {
             }
             window.display();
         }
+        _isVertexChosen[vertexIndex] = false;
     }).detach(); // Detach thread to allow independent operation
 }
 
 void GUILogic::run(const std::vector<Point2D>& points) {
     std::vector<Matching> matchings = PerfectMatchingFinder::getAllMatchings(points);
-    std::vector<std::vector<bool>> adjMatrix = PerfectMatchingFinder::getAdjacencyMatrix(matchings);
+    _adjMatrix = PerfectMatchingFinder::getAdjacencyMatrix(matchings);
+    _isVertexChosen = std::vector<bool>(matchings.size(), false);
 
     sf::RenderWindow window(sf::VideoMode(MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT), "Perfect Matching GUI");
     std::vector<sf::Vector2f> positions;
@@ -155,13 +171,14 @@ void GUILogic::run(const std::vector<Point2D>& points) {
                 sf::Vector2f mousePos(event.mouseButton.x, event.mouseButton.y);
                 int clickedVertex = getClickedVertex(mousePos, positions);
                 if (clickedVertex != -1) {
-                    drawSegmentsInNewWindow(matchings[clickedVertex]);
+                    _isVertexChosen[clickedVertex] = true;
+                    drawSegmentsInNewWindow(matchings[clickedVertex], clickedVertex);
                 }
             }
         }
 
         window.clear(sf::Color::Black);
-        drawMainWindow(window, matchings, adjMatrix, positions);
+        drawMainWindow(window, matchings, _adjMatrix, positions);
         window.display();
     }
 }
