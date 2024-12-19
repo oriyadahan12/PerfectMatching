@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 #include <vector>
 #include <X11/Xlib.h>
 #undef None
@@ -9,24 +10,15 @@ using std::vector;
 using std::cout;
 using std::endl;
 
+vector<Point2D> getPoints(unsigned int n);
+
 int main() {
     if (!XInitThreads()) {
         std::cerr << "Failed to initialize Xlib threading." << std::endl;
         return -1;
     }
 
-    vector<Point2D> points = {
-            Point2D(1,0),
-            Point2D(0.809,0.587),
-            Point2D(-1,0),
-            Point2D(-0.309,0.951),
-            Point2D(-0.809,0.587),
-            Point2D(-0.809,-0.587),
-            Point2D(-0.309,-0.951),
-            Point2D(0.309,-0.951),
-            Point2D(0.809,-0.587),
-            Point2D(0.309,0.951)
-    };
+    vector<Point2D> points = getPoints(10);
 
     GUILogic guiLogic;
     guiLogic.run(points); // Start the GUI logic
@@ -40,4 +32,13 @@ int main() {
     // }
 
     return 0;
+}
+
+
+vector<Point2D> getPoints(unsigned int n) {
+    vector<Point2D> points;
+    points.reserve(n);
+    for (unsigned int i = 0; i < n; ++i)
+        points.emplace_back(cos(2 * M_PI * i / n), sin(2 * M_PI * i / n));
+    return points;
 }

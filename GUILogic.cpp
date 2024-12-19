@@ -4,6 +4,7 @@
 #include <vector>
 #include <math.h>
 #include <thread>
+#include <numeric>
 
 void GUILogic::drawMainWindow(sf::RenderWindow& window, const std::vector<Matching>& matchings, const std::vector<std::vector<bool>>& adjMatrix, const std::vector<sf::Vector2f>& positions) {
     static sf::Font font;
@@ -35,7 +36,8 @@ void GUILogic::drawMainWindow(sf::RenderWindow& window, const std::vector<Matchi
         // Draw vertex number
         sf::Text vertexNumber;
         vertexNumber.setFont(font);
-        vertexNumber.setString(std::to_string(i));
+        int degree = std::accumulate(adjMatrix[i].begin(), adjMatrix[i].end(), 0);
+        vertexNumber.setString(std::to_string(degree));
         vertexNumber.setCharacterSize(TEXT_SIZE);
         vertexNumber.setFillColor(sf::Color::White);
         vertexNumber.setPosition(positions[i].x - 5, positions[i].y - 20);
@@ -146,6 +148,7 @@ void GUILogic::drawSegmentsInNewWindow(const Matching& segments, int vertexIndex
 void GUILogic::run(const std::vector<Point2D>& points) {
     std::vector<Matching> matchings = PerfectMatchingFinder::getAllMatchings(points);
     _adjMatrix = PerfectMatchingFinder::getAdjacencyMatrix(matchings);
+    std::cout << "Number of matchings: " << matchings.size() << std::endl;
     _isVertexChosen = std::vector<bool>(matchings.size(), false);
 
     sf::RenderWindow window(sf::VideoMode(MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT), "Perfect Matching GUI");
