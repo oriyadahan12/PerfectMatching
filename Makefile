@@ -2,7 +2,7 @@ CXX = clang++
 CXXFLAGS = -std=c++17 -Wall -Wextra -O2
 LDFLAGS = -lsfml-graphics -lsfml-window -lsfml-system -lX11
 
-SRCS = Geometry.cpp PerfectMatching.cpp GUILogic.cpp main.cpp
+SRCS = Geometry.cpp PerfectMatching.cpp GUILogic.cpp main.cpp AutomorphismFinder.cpp 
 OBJS = $(SRCS:.cpp=.o)
 EXEC = main
 
@@ -19,6 +19,7 @@ $(EXEC): $(OBJS)
 
 Geometry.o: Geometry.cpp Geometry.hpp
 PerfectMatching.o: PerfectMatching.cpp PerfectMatching.hpp
+AutomorphismFinder.o: AutomorphismFinder.cpp AutomorphismFinder.hpp
 GUILogic.o: GUILogic.cpp GUILogic.hpp
 main.o: main.cpp Geometry.hpp PerfectMatching.hpp GUILogic.hpp
 

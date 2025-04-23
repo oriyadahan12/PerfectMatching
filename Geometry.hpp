@@ -7,9 +7,11 @@
 class Point2D {
 private:
     double _x, _y;
+    int number;
 
 public:
     Point2D(double x, double y) : _x(x), _y(y) {}
+    Point2D(double x, double y, int num) : _x(x), _y(y), number(num){};
 
     double x() const { return _x; }
     double y() const { return _y; }
@@ -22,6 +24,9 @@ public:
     Point2D operator-(const Point2D &p) const { return Point2D(_x - p.x(), _y - p.y()); }
     Point2D operator*(double c) const { return Point2D(_x * c, _y * c); }
     Point2D operator/(double c) const { return Point2D(_x / c, _y / c); }
+    int getNumber() const {
+        return this->number;
+    }
 
 };
 

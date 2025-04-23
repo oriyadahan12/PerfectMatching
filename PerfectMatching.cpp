@@ -1,5 +1,5 @@
 #include "PerfectMatching.hpp"
-
+#include <math.h>
 bool Matching::operator==(const Matching& other) const {
     if (_segments.size() != other.segments().size()) return false;
     for (unsigned int i = 0; i < _segments.size(); i++) {
@@ -107,4 +107,31 @@ vector<vector<bool>> PerfectMatchingFinder::getAdjacencyMatrix(const vector<Matc
     }
 
     return adjMatrix;
+}
+
+bool Matching::isRotate(Matching &m, int rotations)
+{
+    for(unsigned int i = 0; i < this->size(); i++)
+    {
+        Segment now = this->getMatch(i); 
+        Segment next =  m.getMatch(i);
+        int delta1 = std::abs(now.p1().getNumber() - next.p1().getNumber());
+        int delta2 = std::abs(now.p2().getNumber() - next.p2().getNumber());
+        int delta3 = std::abs(now.p1().getNumber() - next.p2().getNumber());
+        int delta4 = std::abs(now.p2().getNumber() - next.p1().getNumber());
+
+        if(delta1 == delta2 && delta1 == rotations)
+        {
+            continue;
+        }
+        else if(delta3 == delta4 && delta3 == rotations){
+            continue;
+        }
+        else{
+            return false;
+        }
+        
+    }
+   
+   return true;
 }

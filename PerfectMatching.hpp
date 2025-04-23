@@ -31,6 +31,8 @@ class Matching {
         auto begin() const { return _segments.begin(); }
         auto end() const { return _segments.end(); }
         inline Segment getMatch(unsigned int i) const { return _segments[i]; }
+
+        bool isRotate(Matching &m, int rotations);
 };
 
 class PerfectMatchingFinder {

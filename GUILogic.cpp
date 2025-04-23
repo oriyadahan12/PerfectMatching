@@ -25,25 +25,6 @@ void GUILogic::drawMainWindow(sf::RenderWindow& window, const std::vector<Matchi
         }
     }
 
-    // Draw vertices
-    for (size_t i = 0; i < matchings.size(); ++i) {
-        // Create vertex
-        sf::CircleShape vertex(VERTEX_RADIUS);
-        vertex.setFillColor(vertexColors[i]);
-        vertex.setPosition(positions[i].x - vertex.getRadius(), positions[i].y - vertex.getRadius());
-        window.draw(vertex);
-
-        // Draw vertex number
-        sf::Text vertexNumber;
-        vertexNumber.setFont(font);
-        int degree = std::accumulate(adjMatrix[i].begin(), adjMatrix[i].end(), 0);
-        vertexNumber.setString(std::to_string(degree));
-        vertexNumber.setCharacterSize(TEXT_SIZE);
-        vertexNumber.setFillColor(sf::Color::White);
-        vertexNumber.setPosition(positions[i].x - 5, positions[i].y - 20);
-        window.draw(vertexNumber);
-    }
-
     // Draw edges based on adjacency matrix
     for (size_t i = 0; i < matchings.size(); ++i) {
         for (size_t j = 0; j < matchings.size(); ++j) {
@@ -58,6 +39,27 @@ void GUILogic::drawMainWindow(sf::RenderWindow& window, const std::vector<Matchi
             }
         }
     }
+
+    // Draw vertices
+    for (size_t i = 0; i < matchings.size(); ++i) {
+        // Create vertex
+        sf::CircleShape vertex(VERTEX_RADIUS);
+        vertex.setFillColor(vertexColors[i]);
+        vertex.setPosition(positions[i].x - vertex.getRadius(), positions[i].y - vertex.getRadius());
+        window.draw(vertex);
+
+        // Draw vertex number
+        sf::Text vertexNumber;
+        vertexNumber.setFont(font);
+        int degree = std::accumulate(adjMatrix[i].begin(), adjMatrix[i].end(), 0);
+        vertexNumber.setString(std::to_string(degree) + " \n(" + std::to_string(i) + ")");
+        vertexNumber.setCharacterSize(TEXT_SIZE/1.25);
+        vertexNumber.setFillColor(sf::Color::Black);
+        vertexNumber.setPosition(positions[i].x - 5, positions[i].y - 20);
+        window.draw(vertexNumber);
+    }
+
+    
 }
 
 // Helper function to check if the mouse is over a vertex
@@ -144,10 +146,9 @@ void GUILogic::drawSegmentsInNewWindow(const Matching& segments, int vertexIndex
         _isVertexChosen[vertexIndex] = false;
     }).detach(); // Detach thread to allow independent operation
 }
-
-void GUILogic::run(const std::vector<Point2D>& points) {
-    std::vector<Matching> matchings = PerfectMatchingFinder::getAllMatchings(points);
-    _adjMatrix = PerfectMatchingFinder::getAdjacencyMatrix(matchings);
+void GUILogic::run(const std::vector<Point2D>& points, std::vector<Matching>& matchings, std::vector <std::vector<bool>> &adjMatrix) {
+    _adjMatrix = adjMatrix;
+    
     std::cout << "Number of matchings: " << matchings.size() << std::endl;
     _isVertexChosen = std::vector<bool>(matchings.size(), false);
 

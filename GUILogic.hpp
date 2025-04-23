@@ -38,7 +38,7 @@ private:
 public:
     inline GUILogic() : MAIN_WINDOW_WIDTH(sf::VideoMode::getDesktopMode().width),
                         MAIN_WINDOW_HEIGHT(sf::VideoMode::getDesktopMode().height - 50) {}
-    void run(const std::vector<Point2D> &points);
+    void run(const std::vector<Point2D> &points, std::vector<Matching>& matchings, std::vector <std::vector<bool>> &adjMatrix);
 
 private:
     std::vector<Point2D> initializePoints();
